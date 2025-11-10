@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Create API Key</title>
+  <title>Generate API Key</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
     body {
@@ -11,8 +11,8 @@
       font-family: "Poppins", sans-serif;
     }
     .container {
-      max-width: 500px;
-      margin-top: 80px;
+      max-width: 400px;
+      margin-top: 100px;
       background: white;
       padding: 30px;
       border-radius: 15px;
@@ -25,56 +25,55 @@
       font-family: monospace;
       text-align: center;
       font-size: 14px;
+      word-wrap: break-word;
     }
   </style>
 </head>
 <body>
   <div class="container text-center">
-    <h3 class="mb-4">🔑 Create API Key</h3>
+    <h4 class="mb-4">🔑 Generate API Key</h4>
 
-    <div class="mb-3 text-start">
-      <label for="appName" class="form-label">Nama Aplikasi</label>
-      <input type="text" id="appName" class="form-control" placeholder="Contoh: MyWebApp">
-    </div>
-
-    <div class="mb-3 text-start">
-      <label for="desc" class="form-label">Deskripsi</label>
-      <textarea id="desc" class="form-control" rows="3" placeholder="Masukkan deskripsi singkat..."></textarea>
-    </div>
-
-    <div class="mt-4">
-      <h6>API Key Anda:</h6>
-      <div class="key-box" id="apiKey"></div>
-      <button class="btn btn-outline-primary w-100 mt-3" id="regenerateBtn">Generate Ulang</button>
-      <button class="btn btn-success w-100 mt-2" onclick="copyKey()">Salin API Key</button>
+    <div class="mt-3">
+      <div class="key-box mb-3" id="apiKey">Klik tombol di bawah</div>
+      <button class="btn btn-primary w-100 mb-2" id="generateBtn">Generate API Key</button>
+      <button class="btn btn-success w-100" id="copyBtn">Salin API Key</button>
     </div>
   </div>
 
   <script>
-    const apiKeyBox = document.getElementById('apiKey');
-    const regenerateBtn = document.getElementById('regenerateBtn');
+    const apiKeyBox = document.getElementById("apiKey");
+    const generateBtn = document.getElementById("generateBtn");
+    const copyBtn = document.getElementById("copyBtn");
 
-    // Fungsi generate otomatis API Key
-    function generateAPIKey() {
-      const randomPart = Math.random().toString(36).substring(2, 15);
-      const randomPart2 = Math.random().toString(36).substring(2, 15);
-      return 'sk-' + randomPart + randomPart2;
-    }
+    // tombol generate
+    generateBtn.addEventListener("click", async () => {
+      try {
+        const res = await fetch("http://localhost:3000/api/generate", {
+          method: "POST",
+        });
+        const data = await res.json();
+        if (data.success) {
+          apiKeyBox.textContent = data.api_key;
+          alert("✅ API Key berhasil dibuat dan disimpan ke database!");
+        } else {
+          alert("❌ Gagal membuat API key!");
+        }
+      } catch (err) {
+        alert("⚠️ Gagal koneksi ke server!");
+        console.error(err);
+      }
+    });
 
-    // Tampilkan API Key saat halaman dibuka
-    function showAPIKey() {
-      apiKeyBox.textContent = generateAPIKey();
-    }
-
-    regenerateBtn.addEventListener('click', showAPIKey);
-
-    function copyKey() {
-      navigator.clipboard.writeText(apiKeyBox.textContent);
-      alert('✅ API Key berhasil disalin!');
-    }
-
-    // Generate otomatis saat halaman dimuat
-    window.onload = showAPIKey;
+    // tombol salin
+    copyBtn.addEventListener("click", () => {
+      const key = apiKeyBox.textContent.trim();
+      if (!key || key === "Klik tombol di bawah") {
+        alert("Tidak ada API Key untuk disalin!");
+        return;
+      }
+      navigator.clipboard.writeText(key);
+      alert("📋 API Key disalin ke clipboard!");
+    });
   </script>
 </body>
 </html>
